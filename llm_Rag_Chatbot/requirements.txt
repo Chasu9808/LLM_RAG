@@ -1,0 +1,37 @@
+# --- HF LLM / 모델 로딩 ---
+torch                      # HF Space GPU 이미지에서 알아서 맞는 버전이 설치됨
+transformers>=4.40.0,<5.0.0
+accelerate>=0.33.0
+huggingface-hub>=0.24.0
+
+# --- LangChain / RAG ---
+langchain==0.3.7
+langchain-core==0.3.17
+langchain-community==0.3.7
+langchain-text-splitters==0.3.2
+
+# --- Vector DB (Chroma + SQLite 패치) ---
+chromadb==0.5.12
+pysqlite3-binary==0.5.4
+
+# --- 임베딩 (예: intfloat/multilingual-e5-base) ---
+sentence-transformers>=2.6.0,<3.0.0
+
+# --- PDF / 문서 로딩 ---
+pymupdf==1.24.9
+pymupdf4llm==0.1.7
+pypdf==6.1.3
+
+# --- Web UI (Gradio) ---
+gradio==5.49.1
+
+# Gradio 5.x 와 충돌 안 나도록 pydantic 범위 고정
+pydantic>=2.0,<2.12
+
+# --- 로컬 STT(Whisper) ---
+faster-whisper==1.0.3
+pydub==0.25.1
+
+# --- 기타 유틸 ---
+python-dotenv>=1.0.0
+numpy>=1.26.0,<2.0.0
