@@ -20,49 +20,47 @@ Whisper(STT)를 활용해 음성 → 텍스트 변환까지 통합한 문서 지
 
 ✨ 주요 기능 (Key Features)
 
-RAG 기반 문서 질의응답 — PDF 업로드 → 청킹 → 임베딩 → Chroma 영구 저장 → LLM generate
+RAG 기반 문서 질의응답
+PDF 업로드 → 청킹 → 임베딩 → Chroma 영구 저장 → LLM generate
 
-멀티 GPU 샤딩 구조 — device_map="auto" 기반 모델 분산 + CPU 오프로딩 차단
+멀티 GPU 샤딩 구조
+device_map="auto" 기반 모델 분산 + CPU 오프로딩 차단
 
-회의록 자동 요약 시스템 — CSV / PDF 입력 → 표준 포맷 변환 → Markdown 요약 생성
+회의록 자동 요약 시스템
+CSV / PDF 입력 → 표준 포맷 변환 → Markdown 요약 생성
 
-로컬 STT 통합 — faster-whisper 기반 음성 → 텍스트 변환 (CSV 저장)
+로컬 STT 통합
+faster-whisper 기반 음성 → 텍스트 변환 (CSV 저장)
 
-한국어 출력 안정화 후처리 — LaTeX 제거, 한자 제거, 문장 완결성 보정
+한국어 출력 안정화 후처리
+LaTeX 제거, 한자 제거, 문장 완결성 보정
 
 🧠 색인 – 검색 – 생성 아키텍처 (Index → Retrieve → Generate)
-1) 문서 색인 (Indexing)
-
-PyMuPDF / pymupdf4llm 기반 PDF 로딩
-
-CharacterTextSplitter 기반 청킹
-
-HuggingFaceEmbeddings 벡터화
-
-Chroma(VectorDB) 영구 저장
-
-관련 파일: core/loader.py, core/embeddings.py
-
-2) 벡터 검색 (Retrieval)
-
-저장된 VectorStore에서 Top-K 문서 검색
-
-retriever 기반 RAG 흐름 구성
-
-관련 파일: core/embeddings.py
-
-3) LLM 생성 (Generation)
-
-PromptTemplate 기반 문서 질의응답 프롬프트 구성
-
-HF generate() 직접 호출 (pipeline 미사용)
-
-AMP + dtype 최적화
-
-한국어 후처리(NFKC, LaTeX 제거, 문장 보정)
-
-관련 파일: core/llm_chain.py
-
+1️⃣ 문서 색인 (Indexing)
+PDF 업로드
+→ PyMuPDF / pymupdf4llm 로딩
+→ CharacterTextSplitter 청킹
+→ HuggingFaceEmbeddings 벡터화
+→ Chroma(VectorDB) 영구 저장
+2️⃣ 벡터 검색 (Retrieval)
+User Question
+→ Retriever (Top-K 검색)
+→ PromptTemplate 구성
+→ HF LLM generate()
+→ 한국어 후처리
+→ Answer 반환
+3️⃣ 회의록 요약 (Meeting Summarization)
+CSV / PDF
+→ 표준 포맷(start|end|speaker_id|text) 변환
+→ LLM 요약 파이프라인
+→ Markdown 출력
+→ 파일 저장
+4️⃣ 음성 → 텍스트 (STT)
+Audio
+→ faster-whisper 로컬 모델
+→ 세그먼트 추출
+→ CSV 저장
+→ UI 미리보기
 🛠️ 기술 스택 (Tech Stack)
 Category	Technology
 Language	Python 3.10+
@@ -76,24 +74,24 @@ PDF Loader	PyMuPDF, pymupdf4llm
 Infra	Multi-GPU (device_map="auto")
 📁 프로젝트 구조 (Project Structure)
 LLM-Document-Assistant/
-├── app.py                          # 실행 엔트리
-├── quick_check.py                  # RAG 간단 테스트
+├── app.py
+├── quick_check.py
 │
 ├── config/
-│   └── config.py                   # 전역 환경 설정
+│   └── config.py
 │
 ├── core/
-│   ├── embeddings.py               # 임베딩 + Chroma VectorDB
-│   ├── loader.py                   # PDF 로딩 + 청킹
-│   ├── llm_chain.py                # RAG LLM 체인
-│   ├── meeting_local.py            # 회의록 준비 + 요약
-│   ├── stt_local.py                # Whisper 기반 STT
-│   ├── sqlite_patch.py             # SQLite 패치
-│   └── ui.py                       # Gradio UI
+│   ├── embeddings.py
+│   ├── loader.py
+│   ├── llm_chain.py
+│   ├── meeting_local.py
+│   ├── stt_local.py
+│   ├── sqlite_patch.py
+│   └── ui.py
 │
-└── requirements.txt                # 의존성 목록
+└── requirements.txt
 🚀 설치 및 실행 (Installation & Run)
-1️⃣ 사전 요구사항 (Prerequisites)
+1️⃣ 사전 요구사항
 
 Python 3.10+
 
@@ -101,7 +99,7 @@ CUDA 환경 (권장)
 
 고성능 GPU 환경 권장 (멀티 GPU 지원)
 
-2️⃣ 설치 (Install)
+2️⃣ 설치
 git clone https://github.com/your-repo/llm-document-assistant.git
 cd llm-document-assistant
 
@@ -110,7 +108,7 @@ source venv/bin/activate      # Mac/Linux
 # venv\Scripts\activate       # Windows
 
 pip install -r requirements.txt
-3️⃣ 실행 (Run)
+3️⃣ 실행
 python app.py
 
 브라우저 접속:
@@ -122,7 +120,7 @@ python quick_check.py
 PDF 색인 → 벡터 생성 → 질의응답 동작 여부 확인
 
 🐛 설계 포인트 (Design Notes)
-멀티 GPU 샤딩 기반 안정화
+🔹 멀티 GPU 안정화
 
 device_map="auto" 적용
 
@@ -132,7 +130,7 @@ max_memory 설정으로 CPU 오프로딩 차단
 
 디바이스 mismatch 오류 방지
 
-한국어 출력 품질 강화
+🔹 한국어 출력 품질 강화
 
 유니코드 NFKC 정규화
 
@@ -142,7 +140,7 @@ LaTeX 수식 자동 치환
 
 한자(CJK) 제거
 
-PDF 로딩 안정성 확보
+🔹 PDF 로딩 안정성 확보
 
 PyMuPDF → pymupdf4llm → PyPDFLoader 다단계 fallback 구조
 
